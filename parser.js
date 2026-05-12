@@ -1,186 +1,251 @@
-
 const Parser = (() => {
+    /**
+     * Parse natural language input
+     * Examples:
+     * - "Doctor appointment next Tuesday at 3 PM"
+     * - "Submit assignment tomorrow evening"
+     * - "Pay electricity bill on May 18"
+     */
     const parse = (input) => {
         const result = {
-            title: "",
+            title: '',
             dueDate: null,
             dueTime: null,
-            priority: "medium",
-            category: ""
+            priority: 'medium'
         };
 
-        if (!input || !input.trim()) return result;
+        // Extract time information
+        const timeInfo = extractTime(input);
+        if (timeInfo.time) {
+            result.dueTime = timeInfo.time;
+        }
+        if (timeInfo.date) {
+            result.dueDate = timeInfo.date;
+        }
 
-        const cleanInput = input.trim();
+        // Extract priority indicators
+        const priority = extractPriority(input);
+        if (priority) {
+            result.priority = priority;
+        }
 
-        result.priority = extractPriority(cleanInput);
-        const dateInfo = extractDateAndTime(cleanInput);
-
-        result.dueDate = dateInfo.dueDate;
-        result.dueTime = dateInfo.dueTime;
-        result.title = extractTitle(cleanInput);
+        // Extract title (remove time/date references)
+        result.title = extractTitle(input, timeInfo);
 
         return result;
     };
 
-    const extractPriority = (input) => {
-        const lower = input.toLowerCase();
+    /**
+     * Extract time and date from input
+     */
+    const extractTime = (input) => {
+        const result = { date: null, time: null };
+        const lowerInput = input.toLowerCase();
 
-        if (
-            lower.includes("urgent") ||
-            lower.includes("asap") ||
-            lower.includes("important") ||
-            lower.includes("critical")
-        ) {
-            return "high";
+        // Time patterns
+        const timePatterns = [
+            /(\d{1,2}):(\d{2})\s*(am|pm|a\.m\.|p\.m\.)?/gi,
+            /(\d{1,2})\s*(am|pm|a\.m\.|p\.m\.)/gi
+        ];
+
+        for (const pattern of timePatterns) {
+            const match = pattern.exec(input);
+            if (match) {
+                result.time = formatTime(match[0]);
+                break;
+            }
         }
 
-        if (lower.includes("low priority") || lower.includes("sometime")) {
-            return "low";
+        // Morning, afternoon, evening
+        if (!result.time) {
+            if (lowerInput.includes('morning')) result.time = '09:00';
+            else if (lowerInput.includes('afternoon')) result.time = '14:00';
+            else if (lowerInput.includes('evening')) result.time = '18:00';
+            else if (lowerInput.includes('night')) result.time = '20:00';
         }
 
-        return "medium";
-    };
-
-    const extractDateAndTime = (input) => {
-        const lower = input.toLowerCase();
-        let dueDate = null;
-        let dueTime = null;
-
-        const timeMatch = input.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
-        if (timeMatch) {
-            dueTime = formatTime(timeMatch[1], timeMatch[2], timeMatch[3]);
-        } else if (lower.includes("morning")) {
-            dueTime = "09:00";
-        } else if (lower.includes("afternoon")) {
-            dueTime = "14:00";
-        } else if (lower.includes("evening")) {
-            dueTime = "18:00";
-        } else if (lower.includes("night")) {
-            dueTime = "20:00";
-        }
-
+        // Date patterns
         const today = new Date();
 
-        if (lower.includes("tomorrow")) {
-            const d = new Date(today);
-            d.setDate(d.getDate() + 1);
-            dueDate = formatDate(d);
-        } else if (lower.includes("today")) {
-            dueDate = formatDate(today);
-        } else {
-            const dayMatch = lower.match(
-                /(next\s+)?(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
-            );
-            if (dayMatch) {
-                dueDate = getNextWeekday(dayMatch[2], Boolean(dayMatch[1]));
+        // Tomorrow
+        if (lowerInput.includes('tomorrow')) {
+            today.setDate(today.getDate() + 1);
+            result.date = formatDate(today);
+        }
+        // Today
+        else if (lowerInput.includes('today')) {
+            result.date = formatDate(new Date());
+        }
+        // Next [day]
+        else {
+            const dayOfWeekMatch = lowerInput.match(/(next\s+)?(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i);
+            if (dayOfWeekMatch) {
+                result.date = getDateOfNextDay(dayOfWeekMatch[2], lowerInput.includes('next'));
             }
         }
 
-        const specificMatch = input.match(/([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?/i);
-        if (!dueDate && specificMatch) {
-            const month = getMonthNumber(specificMatch[1]);
-            const day = parseInt(specificMatch[2], 10);
+        // Specific date patterns (May 18, 5/18, May 18th, etc.)
+        const datePatterns = [
+            /([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?/i,
+            /(\d{1,2})\/(\d{1,2})/,
+            /(\d{1,2})-(\d{1,2})/
+        ];
 
-            if (month !== null) {
-                const d = new Date();
-                d.setMonth(month, day);
-
-                if (d < new Date()) {
-                    d.setFullYear(d.getFullYear() + 1);
+        for (const pattern of datePatterns) {
+            const match = pattern.exec(input);
+            if (match) {
+                const parsed = parseSpecificDate(match, input);
+                if (parsed) {
+                    result.date = parsed;
+                    break;
                 }
-
-                dueDate = formatDate(d);
             }
         }
 
-        const slashMatch = input.match(/(\d{1,2})\/(\d{1,2})/);
-        if (!dueDate && slashMatch) {
-            const month = parseInt(slashMatch[1], 10) - 1;
-            const day = parseInt(slashMatch[2], 10);
-            const d = new Date();
-            d.setMonth(month, day);
-
-            if (d < new Date()) {
-                d.setFullYear(d.getFullYear() + 1);
-            }
-
-            dueDate = formatDate(d);
-        }
-
-        return { dueDate, dueTime };
+        return result;
     };
 
-    const extractTitle = (input) => {
+    /**
+     * Extract priority from input
+     */
+    const extractPriority = (input) => {
+        const lowerInput = input.toLowerCase();
+
+        if (lowerInput.includes('urgent') || lowerInput.includes('asap') || lowerInput.includes('critical') || lowerInput.includes('important')) {
+            return 'high';
+        }
+        if (lowerInput.includes('maybe') || lowerInput.includes('eventually') || lowerInput.includes('low priority')) {
+            return 'low';
+        }
+
+        return null;
+    };
+
+    /**
+     * Extract title by removing time/date references
+     */
+    const extractTitle = (input, timeInfo) => {
         let title = input;
 
-        title = title.replace(
-            /(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/gi,
-            ""
-        );
-        title = title.replace(
-            /(morning|afternoon|evening|night|today|tomorrow)/gi,
-            ""
-        );
-        title = title.replace(
-            /(urgent|asap|important|critical|low priority|sometime)/gi,
-            ""
-        );
-        title = title.replace(
-            /(next\s+)?(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/gi,
-            ""
-        );
-        title = title.replace(/([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?/gi, "");
-        title = title.replace(/on\s+/gi, "");
-        title = title.replace(/at\s+/gi, "");
-        title = title.trim().replace(/\s+/g, " ");
+        // Remove time references
+        title = title.replace(/(\d{1,2}):(\d{2})\s*(am|pm|a\.m\.|p\.m\.)?/gi, '');
+        title = title.replace(/(morning|afternoon|evening|night)/gi, '');
+
+        // Remove date references
+        title = title.replace(/(tomorrow|today|next\s+\w+)/gi, '');
+        title = title.replace(/([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?/gi, '');
+        title = title.replace(/on\s+/gi, '');
+        title = title.replace(/at\s+/gi, '');
+
+        // Remove priority indicators
+        title = title.replace(/(urgent|asap|critical|important|maybe|eventually|low priority)/gi, '');
+
+        // Clean up excess whitespace
+        title = title.trim().replace(/\s+/g, ' ');
 
         return title || input;
     };
 
-    const formatTime = (hoursStr, minutesStr, meridiem) => {
-        let hours = parseInt(hoursStr, 10);
-        const minutes = minutesStr ? parseInt(minutesStr, 10) : 0;
+    /**
+     * Format time to HH:MM format
+     */
+    const formatTime = (timeStr) => {
+        const match = timeStr.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)?/i);
+        if (!match) return null;
 
-        if (meridiem) {
-            const m = meridiem.toLowerCase();
-            if (m === "pm" && hours !== 12) hours += 12;
-            if (m === "am" && hours === 12) hours = 0;
+        let hours = parseInt(match[1]);
+        const minutes = match[2] ? parseInt(match[2]) : 0;
+        const meridiem = match[3] ? match[3].toLowerCase() : '';
+
+        if (meridiem === 'pm' || meridiem === 'p.m.') {
+            if (hours !== 12) hours += 12;
+        } else if (meridiem === 'am' || meridiem === 'a.m.') {
+            if (hours === 12) hours = 0;
         }
 
-        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     };
 
+    /**
+     * Format date to YYYY-MM-DD format
+     */
     const formatDate = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, "0");
-        const d = String(date.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
-    const getNextWeekday = (dayName, isNext = false) => {
+    /**
+     * Get date of next occurrence of a day of week
+     */
+    const getDateOfNextDay = (dayName, isNext = false) => {
         const days = {
-            sunday: 0,
-            monday: 1,
-            tuesday: 2,
-            wednesday: 3,
-            thursday: 4,
-            friday: 5,
-            saturday: 6
+            monday: 1, tuesday: 2, wednesday: 3, thursday: 4,
+            friday: 5, saturday: 6, sunday: 0
         };
 
+        const dayIndex = days[dayName.toLowerCase()];
         const today = new Date();
         const currentDay = today.getDay();
-        const targetDay = days[dayName.toLowerCase()];
+        let daysToAdd = dayIndex - currentDay;
 
-        let diff = targetDay - currentDay;
-        if (diff <= 0 || isNext) diff += 7;
+        if (daysToAdd <= 0) {
+            daysToAdd += 7;
+        } else if (daysToAdd === 0 && isNext) {
+            daysToAdd = 7;
+        } else if (daysToAdd === 0) {
+            daysToAdd = 0; // Today
+        }
 
-        const d = new Date(today);
-        d.setDate(d.getDate() + diff);
-        return formatDate(d);
+        const date = new Date(today);
+        date.setDate(date.getDate() + daysToAdd);
+        return formatDate(date);
     };
 
+    /**
+     * Parse specific date patterns
+     */
+    const parseSpecificDate = (match, input) => {
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth();
+        const currentDate = new Date().getDate();
+
+        // Month Day format
+        if (isNaN(parseInt(match[1]))) {
+            const monthName = match[1];
+            const day = parseInt(match[2]);
+            const month = getMonthNumber(monthName);
+
+            if (month !== null) {
+                const date = new Date(currentYear, month, day);
+                // If the date is in the past, assume next year
+                if (date < new Date()) {
+                    date.setFullYear(currentYear + 1);
+                }
+                return formatDate(date);
+            }
+        }
+        // Month/Day format
+        else {
+            const month = parseInt(match[1]);
+            const day = parseInt(match[2]);
+
+            if (month > 0 && month <= 12 && day > 0 && day <= 31) {
+                const date = new Date(currentYear, month - 1, day);
+                if (date < new Date()) {
+                    date.setFullYear(currentYear + 1);
+                }
+                return formatDate(date);
+            }
+        }
+
+        return null;
+    };
+
+    /**
+     * Get month number from month name
+     */
     const getMonthNumber = (monthName) => {
         const months = {
             january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
@@ -192,5 +257,7 @@ const Parser = (() => {
         return months[monthName.toLowerCase()] ?? null;
     };
 
-    return { parse };
+    return {
+        parse
+    };
 })();

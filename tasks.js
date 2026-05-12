@@ -1,181 +1,210 @@
-
 const Tasks = (() => {
+  /**
+   * Create a new task
+   */
   const create = (data) => {
-    return Storage.addTask({
-      title: data.title || "Untitled Task",
-      description: data.description || "",
+    const task = {
+      title: data.title || 'Untitled Task',
+      description: data.description || '',
       dueDate: data.dueDate || null,
       dueTime: data.dueTime || null,
-      priority: data.priority || "medium",
-      category: data.category || ""
-    });
+      priority: data.priority || 'medium',
+      category: data.category || '',
+      completed: false,
+      archived: false,
+      inTrash: false
+    };
+
+    return Storage.addTask(task);
   };
 
+  /**
+   * Update a task
+   */
   const update = (id, updates) => {
     return Storage.updateTask(id, updates);
   };
 
+  /**
+   * Complete a task
+   */
   const complete = (id) => {
-    return Storage.updateTask(id, {
-      completed: true,
-      completedAt: new Date().toISOString()
-    });
+    const task = Storage.getTask(id);
+    if (task) {
+      Storage.updateTask(id, { completed: true });
+      // Update gamification
+      Gamification.onTaskCompleted(task);
+      return task;
+    }
+    return null;
   };
 
+  /**
+   * Uncomplete a task
+   */
   const uncomplete = (id) => {
-    return Storage.updateTask(id, {
-      completed: false,
-      completedAt: null
-    });
+    return Storage.updateTask(id, { completed: false });
   };
 
-  const remove = (id) => Storage.deleteTask(id);
-  const restore = (id) => Storage.restoreTask(id);
-  const archive = (id) => Storage.archiveTask(id);
-  const unarchive = (id) => Storage.unarchiveTask(id);
-
-  const getSectionTasks = (section) => {
-    switch (section) {
-      case "today":
-        return Storage.getTodayTasks();
-      case "upcoming":
-        return Storage.getUpcomingTasks();
-      case "someday":
-        return Storage.getSomedayTasks();
-      case "completed":
-        return Storage.getCompletedTasks();
-      case "archive":
-        return Storage.getArchivedTasks();
-      case "trash":
-        return Storage.getTrashTasks();
-      default:
-        return Storage.getTodayTasks();
-    }
+  /**
+   * Delete a task (soft delete)
+   */
+  const delete_ = (id) => {
+    return Storage.deleteTask(id);
   };
 
-  const renderSection = (section) => {
-    const container = document.getElementById(`${section}-list`);
-    if (!container) return;
+  /**
+   * Restore a task from trash
+   */
+  const restore = (id) => {
+    return Storage.restoreTask(id);
+  };
 
-    const tasks = getSectionTasks(section);
-    container.innerHTML = "";
+  /**
+   * Permanently delete a task
+   */
+  const permanentlyDelete = (id) => {
+    Storage.permanentlyDeleteTask(id);
+  };
 
-    if (section === "completed") {
-      const summary = document.getElementById("completedSummary");
-      if (summary) {
-        summary.innerHTML = tasks.length
-          ? `<p>🎉 You completed <strong>${tasks.length} task${tasks.length === 1 ? "" : "s"}</strong> today!</p>`
-          : "<p>Complete tasks to see them here!</p>";
+  /**
+   * Archive a task
+   */
+  const archive = (id) => {
+    return Storage.archiveTask(id);
+  };
+
+  /**
+   * Unarchive a task
+   */
+  const unarchive = (id) => {
+    return Storage.unarchiveTask(id);
+  };
+
+  /**
+   * Move to Someday
+   */
+  const moveToSomeday = (id) => {
+    return Storage.moveToSomeday(id);
+  };
+
+  /**
+   * Get all tasks by category
+   */
+  const getByCategory = (category) => {
+    const tasks = Storage.getActiveTasks();
+    return tasks.filter(t => t.category === category);
+  };
+
+  /**
+   * Get tasks by priority
+   */
+  const getByPriority = (priority) => {
+    const tasks = Storage.getActiveTasks();
+    return tasks.filter(t => t.priority === priority);
+  };
+
+  /**
+   * Get overdue tasks
+   */
+  const getOverdue = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const tasks = Storage.getActiveTasks();
+    return tasks.filter(t => t.dueDate && t.dueDate < today);
+  };
+
+  /**
+   * Get tasks due soon (within 3 days)
+   */
+  const getDueSoon = () => {
+    const today = new Date();
+    const inThreeDays = new Date();
+    inThreeDays.setDate(inThreeDays.getDate() + 3);
+
+    const todayStr = today.toISOString().split('T')[0];
+    const threeStr = inThreeDays.toISOString().split('T')[0];
+
+    const tasks = Storage.getActiveTasks();
+    return tasks.filter(t => t.dueDate && t.dueDate >= todayStr && t.dueDate <= threeStr);
+  };
+
+  /**
+   * Get completed today
+   */
+  const getCompletedToday = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const tasks = Storage.getCompletedTasks();
+    return tasks.filter(t => {
+      if (t.completedAt) {
+        return t.completedAt.split('T')[0] === today;
       }
-    }
-
-    if (!tasks.length) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">📭</div>
-          <h3>No tasks yet</h3>
-          <p>Create a task to get started</p>
-        </div>
-      `;
-      return;
-    }
-
-    tasks.forEach((task) => {
-      container.appendChild(createTaskElement(task, section));
+      return false;
     });
   };
 
-  const createTaskElement = (task, section) => {
-    const item = document.createElement("div");
-    item.className = `task-item ${task.completed ? "completed" : ""}`;
-    item.dataset.taskId = task.id;
+  /**
+   * Get completed this week
+   */
+  const getCompletedThisWeek = () => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const dueText = formatDueDate(task.dueDate, task.dueTime);
-    const descriptionHtml = task.description
-      ? `<p class="task-description">${escapeHtml(task.description)}</p>`
-      : "";
-
-    const primaryAction =
-      section === "trash" || section === "archive"
-        ? `<button class="task-btn" data-action="restore" title="Restore">↩️</button>`
-        : `<button class="task-btn" data-action="toggle" title="Mark complete">${task.completed ? "↩️" : "✓"}</button>`;
-
-    const extraAction =
-      section === "trash"
-        ? ""
-        : section === "archive"
-        ? `<button class="task-btn delete" data-action="delete" title="Delete">🗑️</button>`
-        : `
-          <button class="task-btn" data-action="edit" title="Edit">✏️</button>
-          <button class="task-btn" data-action="archive" title="Archive">📦</button>
-          <button class="task-btn delete" data-action="delete" title="Delete">🗑️</button>
-        `;
-
-    item.innerHTML = `
-      <button class="task-checkbox ${task.completed ? "checked" : ""}" data-action="toggle" aria-label="Toggle completion">
-        ${task.completed ? "✓" : ""}
-      </button>
-
-      <div class="task-content">
-        <h3 class="task-title">${escapeHtml(task.title)}</h3>
-        ${descriptionHtml}
-        <div class="task-meta">
-          ${dueText ? `<span class="task-meta-item">📅 ${escapeHtml(dueText)}</span>` : ""}
-          ${task.category ? `<span class="task-meta-item">${escapeHtml(task.category)}</span>` : ""}
-          <span class="task-priority ${task.priority}">${task.priority.toUpperCase()}</span>
-        </div>
-      </div>
-
-      <div class="task-actions">
-        ${primaryAction}
-        ${extraAction}
-      </div>
-    `;
-
-    return item;
+    return Storage.getCompletedTasks().filter(t => {
+      if (t.completedAt) {
+        const completedDate = new Date(t.completedAt);
+        return completedDate >= weekAgo && completedDate <= now;
+      }
+      return false;
+    });
   };
 
-  const formatDueDate = (dueDate, dueTime) => {
-    if (!dueDate) return "";
+  /**
+   * Check if task is overdue by days
+   */
+  const isOverdueBy = (task, days) => {
+    if (!task.dueDate) return false;
 
-    const today = new Date().toISOString().split("T")[0];
-    let label = dueDate;
+    const today = new Date();
+    const taskDue = new Date(task.dueDate);
+    const diffTime = today - taskDue;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (dueDate === today) {
-      label = "Today";
-    } else {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split("T")[0];
+    return diffDays >= days;
+  };
 
-      if (dueDate === tomorrowStr) {
-        label = "Tomorrow";
+  /**
+   * Format task for display
+   */
+  const formatForDisplay = (task) => {
+    const today = new Date().toISOString().split('T')[0];
+    let dueText = '';
+
+    if (task.dueDate) {
+      if (task.dueDate === today) {
+        dueText = 'Today';
       } else {
-        const d = new Date(dueDate);
-        label = d.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric"
-        });
+        const due = new Date(task.dueDate);
+        dueText = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+
+      if (task.dueTime) {
+        const time = new Date(`2000-01-01T${task.dueTime}`);
+        dueText += ` at ${time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
       }
     }
 
-    if (dueTime) {
-      const time = new Date(`2000-01-01T${dueTime}`);
-      const timeLabel = time.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true
-      });
-      return `${label} at ${timeLabel}`;
-    }
-
-    return label;
+    return {
+      ...task,
+      dueText,
+      isOverdue: task.dueDate && task.dueDate < today && !task.completed
+    };
   };
 
-  const escapeHtml = (text) => {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+  /**
+   * Export tasks as JSON
+   */
+  const export_ = () => {
+    return Storage.getAllTasks();
   };
 
   return {
@@ -183,12 +212,20 @@ const Tasks = (() => {
     update,
     complete,
     uncomplete,
-    remove,
+    delete: delete_,
     restore,
+    permanentlyDelete,
     archive,
     unarchive,
-    renderSection,
-    getSectionTasks,
-    formatDueDate
+    moveToSomeday,
+    getByCategory,
+    getByPriority,
+    getOverdue,
+    getDueSoon,
+    getCompletedToday,
+    getCompletedThisWeek,
+    isOverdueBy,
+    formatForDisplay,
+    export: export_
   };
 })();

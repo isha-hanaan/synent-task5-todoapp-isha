@@ -2,147 +2,323 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TaskFlow Dashboard</title>
-
-    <link rel="stylesheet" href="css/styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TaskFlow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 
-<body>
+<body class="dashboard-page">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+    </button>
 
-    <div class="dashboard-layout">
-
+    <div class="dashboard-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-logo">
-                <h2>TaskFlow</h2>
+            <div class="sidebar-header">
+                <a href="index.html" class="logo-link">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" />
+                        <path d="M10 16L14 20L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" fill="none" />
+                    </svg>
+                    <span>TaskFlow</span>
+                </a>
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item active">Today</button>
-                <button class="nav-item">Upcoming</button>
-                <button class="nav-item">Completed</button>
-                <button class="nav-item">Archive</button>
+                <button class="nav-item active" data-section="today">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span>Today</span>
+                </button>
+                <button class="nav-item" data-section="upcoming">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>Upcoming</span>
+                </button>
+                <button class="nav-item" data-section="someday">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4" />
+                        <path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11" />
+                    </svg>
+                    <span>Someday</span>
+                </button>
+                <button class="nav-item" data-section="completed">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <span>Completed Today</span>
+                </button>
+                <button class="nav-item" data-section="archive">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="21 8 21 21 3 21 3 8" />
+                        <line x1="1" y1="3" x2="23" y2="3" />
+                        <path d="M10 12v5M14 12v5" />
+                    </svg>
+                    <span>Archive</span>
+                </button>
+                <button class="nav-item" data-section="trash">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    <span>Trash</span>
+                </button>
+                <button class="nav-item" data-section="analytics">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="2" x2="12" y2="22" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    <span>Analytics</span>
+                </button>
             </nav>
+
+            <!-- Gamification Stats -->
+            <div class="sidebar-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streakValue">0</div>
+                    <div class="stat-unit">days 🔥</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">XP Points</div>
+                    <div class="stat-value" id="xpValue">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Level</div>
+                    <div class="stat-value" id="levelValue">1</div>
+                </div>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-
             <!-- Top Bar -->
-            <header class="topbar">
-                <h1>Today's Tasks</h1>
-
-                <button class="btn btn-primary" id="openModalBtn">
-                    + Add Task
-                </button>
-            </header>
-
-            <!-- Quick Add -->
-            <section class="quick-add">
-                <input type="text" id="quickTaskInput" placeholder="Add a quick task..." />
-
-                <button class="btn btn-primary" id="quickAddBtn">
-                    Add
-                </button>
-            </section>
-
-            <!-- Task List -->
-            <section class="task-section">
-
-                <div class="task-list" id="taskList">
-
-                    <div class="task-card">
-                        <div class="task-check"></div>
-
-                        <div class="task-content">
-                            <h3>Finish dashboard UI</h3>
-                            <p>Create responsive dashboard layout and task system.</p>
-                        </div>
-
-                        <div class="task-priority high">
-                            High
-                        </div>
-                    </div>
-
-                    <div class="task-card completed">
-                        <div class="task-check checked"></div>
-
-                        <div class="task-content">
-                            <h3>Build landing page</h3>
-                            <p>Complete homepage sections and CTA.</p>
-                        </div>
-
-                        <div class="task-priority low">
-                            Done
-                        </div>
-                    </div>
-
+            <div class="top-bar">
+                <div class="search-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search tasks...">
                 </div>
+                <button class="btn btn-secondary" id="settingsBtn">⚙️ Settings</button>
+            </div>
 
-            </section>
+            <!-- Quick Add Section -->
+            <div class="quick-add-section">
+                <div class="quick-add">
+                    <input type="text" id="quickAddInput" placeholder="Add a task... (e.g., 'Meeting tomorrow at 3pm')"
+                        aria-label="Quick add task">
+                    <div class="quick-add-buttons">
+                        <button class="btn btn-icon" id="advancedAddBtn" title="Advanced add">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="16" />
+                                <line x1="8" y1="12" x2="16" y2="12" />
+                            </svg>
+                        </button>
+                        <button class="btn btn-primary" id="quickAddBtn">Add</button>
+                    </div>
+                </div>
+                <div class="priority-tags">
+                    <button class="tag-btn" data-priority="high">🔴 High</button>
+                    <button class="tag-btn" data-priority="medium">🟡 Medium</button>
+                    <button class="tag-btn" data-priority="low">🟢 Low</button>
+                </div>
+            </div>
 
+            <!-- Sections Container -->
+            <div class="sections-container">
+                <!-- Today Section -->
+                <section class="task-section active" id="today-section" data-section="today">
+                    <h2 class="section-title">Today</h2>
+                    <div class="task-list" id="today-list"></div>
+                </section>
+
+                <!-- Upcoming Section -->
+                <section class="task-section" id="upcoming-section" data-section="upcoming">
+                    <h2 class="section-title">Upcoming</h2>
+                    <div class="task-list" id="upcoming-list"></div>
+                </section>
+
+                <!-- Someday Section -->
+                <section class="task-section" id="someday-section" data-section="someday">
+                    <h2 class="section-title">Someday</h2>
+                    <div class="task-list" id="someday-list"></div>
+                </section>
+
+                <!-- Completed Today Section -->
+                <section class="task-section" id="completed-section" data-section="completed">
+                    <h2 class="section-title">Completed Today</h2>
+                    <div class="completed-summary" id="completedSummary"></div>
+                    <div class="task-list" id="completed-list"></div>
+                </section>
+
+                <!-- Archive Section -->
+                <section class="task-section" id="archive-section" data-section="archive">
+                    <h2 class="section-title">Archive</h2>
+                    <div class="task-list" id="archive-list"></div>
+                </section>
+
+                <!-- Trash Section -->
+                <section class="task-section" id="trash-section" data-section="trash">
+                    <h2 class="section-title">Trash</h2>
+                    <div class="task-list" id="trash-list"></div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section class="task-section" id="analytics-section" data-section="analytics">
+                    <h2 class="section-title">Analytics</h2>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>This Week</h3>
+                            <div class="analytics-stat" id="weekCompleted">0 completed</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Productivity Score</h3>
+                            <div class="progress-ring">
+                                <svg width="100" height="100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke-width="4" class="progress-bg" />
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke-width="4" class="progress-fill"
+                                        id="productivityRing" stroke-dasharray="282.6" stroke-dashoffset="282.6" />
+                                </svg>
+                                <div class="ring-label" id="productivityScore">0%</div>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Streak Calendar</h3>
+                            <div class="streak-calendar" id="streakCalendar"></div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Top Categories</h3>
+                            <div class="categories-list" id="categoriesList"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
 
-    <!-- Modal -->
+    <!-- Task Modal -->
     <div class="modal" id="taskModal">
-
         <div class="modal-content">
-
             <div class="modal-header">
-                <h2>Add New Task</h2>
-
-                <button class="close-modal" id="closeModalBtn">
-                    ×
-                </button>
+                <h2 id="modalTitle">Add New Task</h2>
+                <button class="modal-close" aria-label="Close modal">&times;</button>
             </div>
-
-            <form class="task-form">
-
+            <form class="task-form" id="taskForm">
                 <div class="form-group">
-                    <label>Task Title</label>
-
-                    <input type="text" placeholder="Enter task title" />
+                    <label for="taskTitle">Task Title *</label>
+                    <input type="text" id="taskTitle" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Description</label>
-
-                    <textarea placeholder="Task description"></textarea>
+                    <label for="taskDesc">Description</label>
+                    <textarea id="taskDesc" rows="3"></textarea>
                 </div>
-
                 <div class="form-row">
-
                     <div class="form-group">
-                        <label>Priority</label>
-
-                        <select>
-                            <option>Low</option>
-                            <option selected>Medium</option>
-                            <option>High</option>
+                        <label for="taskDate">Due Date</label>
+                        <input type="date" id="taskDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskTime">Due Time</label>
+                        <input type="time" id="taskTime">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label>Date</label>
-
-                        <input type="date" />
+                        <label for="taskCategory">Category</label>
+                        <input type="text" id="taskCategory" placeholder="e.g., Work, Personal">
                     </div>
-
                 </div>
-
-                <button class="btn btn-primary">
-                    Save Task
-                </button>
-
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="modalCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <script src="js/dashboard.js"></script>
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close" aria-label="Close settings">&times;</button>
+            </div>
+            <div class="settings-content">
+                <div class="settings-group">
+                    <h3>General</h3>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notificationsEnabled" checked>
+                        <span>Enable notifications</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="soundEnabled" checked>
+                        <span>Enable sound effects</span>
+                    </label>
+                </div>
+                <div class="settings-group">
+                    <h3>Data</h3>
+                    <button class="btn btn-secondary" id="exportData">Export Data</button>
+                    <button class="btn btn-secondary" id="importData">Import Data</button>
+                    <button class="btn btn-danger" id="clearData">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Celebration Effects -->
+    <div id="confettiContainer" class="confetti-container"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/parser.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/gamification.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>
