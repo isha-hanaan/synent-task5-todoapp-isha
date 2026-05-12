@@ -1,25 +1,21 @@
 
 const App = (() => {
-    let activeSection = "today";
-
     const init = () => {
         if (!document.body.classList.contains("dashboard-page")) return;
 
         setupTheme();
         setupNavigation();
         setupQuickAdd();
-        setupModal();
+        setupModals();
         setupTaskActions();
         setupSearch();
-        setupSettingsButtons();
-        renderCurrentSection();
+        setupSettings();
+        renderInitialView();
     };
 
     const setupTheme = () => {
-        const savedTheme = Storage.getTheme();
-        if (savedTheme === "dark") {
-            document.documentElement.classList.add("dark");
-        }
+        const theme = Storage.getTheme();
+        if (theme === "dark") document.documentElement.classList.add("dark");
 
         const themeToggle = document.getElementById("themeToggle");
         if (!themeToggle) return;
@@ -33,13 +29,8 @@ const App = (() => {
     const setupNavigation = () => {
         document.querySelectorAll(".nav-item").forEach((btn) => {
             btn.addEventListener("click", () => {
-                document.querySelectorAll(".nav-item").forEach((item) => {
-                    item.classList.remove("active");
-                });
-
-                btn.classList.add("active");
                 activeSection = btn.dataset.section;
-                renderCurrentSection();
+                UI.switchSection(activeSection);
             });
         });
     };
@@ -58,35 +49,32 @@ const App = (() => {
 
         if (advancedAddBtn) {
             advancedAddBtn.addEventListener("click", () => {
-                openModal();
-                clearTaskForm();
+                UI.clearTaskForm();
+                UI.showModal("taskModal");
             });
         }
+
+        document.querySelectorAll(".tag-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                if (quickAddInput) quickAddInput.dataset.priority = btn.dataset.priority;
+            });
+        });
     };
 
-    const setupModal = () => {
-        const taskModal = document.getElementById("taskModal");
+    const setupModals = () => {
+        document.querySelectorAll(".modal").forEach((modal) => {
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) UI.hideModal(modal.id);
+            });
+        });
+
         const taskForm = document.getElementById("taskForm");
         const modalCancel = document.getElementById("modalCancel");
         const modalClose = document.querySelector("#taskModal .modal-close");
 
-        if (taskForm) {
-            taskForm.addEventListener("submit", handleTaskSubmit);
-        }
-
-        if (modalCancel) {
-            modalCancel.addEventListener("click", closeModal);
-        }
-
-        if (modalClose) {
-            modalClose.addEventListener("click", closeModal);
-        }
-
-        if (taskModal) {
-            taskModal.addEventListener("click", (e) => {
-                if (e.target === taskModal) closeModal();
-            });
-        }
+        if (taskForm) taskForm.addEventListener("submit", handleTaskSubmit);
+        if (modalCancel) modalCancel.addEventListener("click", () => UI.hideModal("taskModal"));
+        if (modalClose) modalClose.addEventListener("click", () => UI.hideModal("taskModal"));
     };
 
     const setupTaskActions = () => {
@@ -100,63 +88,33 @@ const App = (() => {
         if (!searchInput) return;
 
         searchInput.addEventListener("input", (e) => {
-            const query = e.target.value.trim();
-
-            if (!query) {
-                renderCurrentSection();
-                return;
-            }
-
-            const results = Storage.searchTasks(query);
-            const container = document.getElementById("today-list");
-            if (container) {
-                container.innerHTML = "";
-                if (!results.length) {
-                    container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">🔎</div>
-              <h3>No matching tasks</h3>
-              <p>Try a different search term</p>
-            </div>
-          `;
-                    return;
-                }
-
-                results.forEach((task) => {
-                    container.appendChild(createSearchTaskElement(task));
-                });
-            }
-
-            setSectionVisible("today");
+            UI.updateSearchResults(e.target.value);
         });
     };
 
-    const setupSettingsButtons = () => {
-        const clearBtn = document.getElementById("clearData");
+    const setupSettings = () => {
+        const settingsBtn = document.getElementById("settingsBtn");
         const exportBtn = document.getElementById("exportData");
         const importBtn = document.getElementById("importData");
+        const clearBtn = document.getElementById("clearData");
+        const settingsClose = document.querySelector("#settingsModal .modal-close");
 
-        if (clearBtn) {
-            clearBtn.addEventListener("click", () => {
-                if (confirm("Clear all saved data? This cannot be undone.")) {
-                    Storage.clearAllData();
-                    location.reload();
-                }
-            });
-        }
+        if (settingsBtn) settingsBtn.addEventListener("click", () => UI.showModal("settingsModal"));
+        if (settingsClose) settingsClose.addEventListener("click", () => UI.hideModal("settingsModal"));
 
         if (exportBtn) {
             exportBtn.addEventListener("click", () => {
-                const data = JSON.stringify(Storage.getAllTasks(), null, 2);
+                const data = Storage.exportData();
                 const blob = new Blob([data], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
 
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "taskflow-data.json";
+                a.download = `taskflow-backup-${new Date().toISOString().split("T")[0]}.json`;
                 a.click();
 
                 URL.revokeObjectURL(url);
+                UI.showToast("💾 Data exported!", "success");
             });
         }
 
@@ -164,28 +122,35 @@ const App = (() => {
             importBtn.addEventListener("click", () => {
                 const input = document.createElement("input");
                 input.type = "file";
-                input.accept = "application/json";
+                input.accept = ".json";
 
                 input.addEventListener("change", () => {
                     const file = input.files?.[0];
                     if (!file) return;
 
                     const reader = new FileReader();
-                    reader.onload = () => {
-                        try {
-                            const tasks = JSON.parse(reader.result);
-                            if (Array.isArray(tasks)) {
-                                Storage.saveTasks(tasks);
-                                renderCurrentSection();
-                            }
-                        } catch {
-                            alert("Invalid JSON file.");
+                    reader.onload = (event) => {
+                        const ok = Storage.importData(event.target.result);
+                        if (ok) {
+                            UI.showToast("📂 Data imported!", "success");
+                            location.reload();
+                        } else {
+                            UI.showToast("❌ Invalid import file", "error");
                         }
                     };
                     reader.readAsText(file);
                 });
 
                 input.click();
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener("click", () => {
+                if (confirm("Clear all data? This cannot be undone.")) {
+                    Storage.clearAllData();
+                    location.reload();
+                }
             });
         }
     };
@@ -195,10 +160,18 @@ const App = (() => {
         if (!input || !input.value.trim()) return;
 
         const parsed = Parser.parse(input.value.trim());
-        Tasks.create(parsed);
+        const priority = input.dataset.priority || parsed.priority || "medium";
+
+        Tasks.create({
+            ...parsed,
+            priority
+        });
 
         input.value = "";
-        renderCurrentSection();
+        delete input.dataset.priority;
+
+        UI.showToast("✅ Task added!", "success");
+        UI.switchSection(document.querySelector(".nav-item.active")?.dataset.section || "today");
     };
 
     const handleTaskSubmit = (e) => {
@@ -218,13 +191,15 @@ const App = (() => {
 
         if (editId) {
             Tasks.update(editId, taskData);
+            UI.showToast("✏️ Task updated!", "success");
         } else {
             Tasks.create(taskData);
+            UI.showToast("✅ Task created!", "success");
         }
 
-        closeModal();
-        clearTaskForm();
-        renderCurrentSection();
+        UI.hideModal("taskModal");
+        UI.clearTaskForm();
+        UI.switchSection(document.querySelector(".nav-item.active")?.dataset.section || "today");
     };
 
     const handleTaskAction = (e) => {
@@ -236,140 +211,65 @@ const App = (() => {
 
         const taskId = taskItem.dataset.taskId;
         const action = actionEl.dataset.action;
-
-        if (action === "toggle") {
-            const task = Storage.getTask(taskId);
-            if (!task) return;
-
-            if (task.completed) {
-                Tasks.uncomplete(taskId);
-            } else {
-                Tasks.complete(taskId);
-            }
-
-            renderCurrentSection();
-            return;
-        }
-
-        if (action === "edit") {
-            loadTaskForEdit(taskId);
-            return;
-        }
-
-        if (action === "delete") {
-            Tasks.remove(taskId);
-            renderCurrentSection();
-            return;
-        }
-
-        if (action === "archive") {
-            Tasks.archive(taskId);
-            renderCurrentSection();
-            return;
-        }
-
-        if (action === "restore") {
-            const task = Storage.getTask(taskId);
-            if (task?.archived) {
-                Tasks.unarchive(taskId);
-            } else {
-                Tasks.restore(taskId);
-            }
-            renderCurrentSection();
-        }
-    };
-
-    const loadTaskForEdit = (taskId) => {
         const task = Storage.getTask(taskId);
+
         if (!task) return;
 
-        document.getElementById("taskTitle").value = task.title || "";
-        document.getElementById("taskDesc").value = task.description || "";
-        document.getElementById("taskDate").value = task.dueDate || "";
-        document.getElementById("taskTime").value = task.dueTime || "";
-        document.getElementById("taskPriority").value = task.priority || "medium";
-        document.getElementById("taskCategory").value = task.category || "";
+        switch (action) {
+            case "toggle":
+                if (task.completed) {
+                    Tasks.uncomplete(taskId);
+                    UI.showToast("↩️ Task uncompleted", "info");
+                } else {
+                    Tasks.complete(taskId);
+                    Analytics.trackCompletion(task);
+                    Gamification.onTaskCompleted(task);
 
-        const form = document.getElementById("taskForm");
-        if (form) form.dataset.editId = taskId;
+                    AnimationsModule.taskCompletionEffect(taskItem, () => {
+                        const badges = Gamification.getEarnedBadges();
+                        if (badges.length) {
+                            AnimationsModule.badgeUnlockEffect(badges[0].name);
+                        }
+                    });
 
-        openModal();
+                    UI.showToast("🎉 Task completed!", "success");
+                }
+                break;
+
+            case "edit":
+                UI.loadTaskForEdit(taskId);
+                return;
+
+            case "delete":
+                Tasks.remove(taskId);
+                UI.showToast("🗑️ Task moved to trash", "info");
+                break;
+
+            case "archive":
+                Tasks.archive(taskId);
+                UI.showToast("📦 Task archived", "info");
+                break;
+
+            case "restore":
+                if (task.archived) {
+                    Tasks.unarchive(taskId);
+                } else {
+                    Tasks.restore(taskId);
+                }
+                UI.showToast("↩️ Task restored", "success");
+                break;
+        }
+
+        UI.updateGamificationDisplay();
+        UI.switchSection(document.querySelector(".nav-item.active")?.dataset.section || "today");
     };
 
-    const clearTaskForm = () => {
-        const form = document.getElementById("taskForm");
-        if (form) delete form.dataset.editId;
-
-        const title = document.getElementById("taskTitle");
-        const desc = document.getElementById("taskDesc");
-        const date = document.getElementById("taskDate");
-        const time = document.getElementById("taskTime");
-        const priority = document.getElementById("taskPriority");
-        const category = document.getElementById("taskCategory");
-
-        if (form) form.reset();
-        if (priority) priority.value = "medium";
-        if (title) title.value = "";
-        if (desc) desc.value = "";
-        if (date) date.value = "";
-        if (time) time.value = "";
-        if (category) category.value = "";
+    const renderInitialView = () => {
+        UI.updateGamificationDisplay();
+        UI.switchSection("today");
     };
 
-    const openModal = () => {
-        const modal = document.getElementById("taskModal");
-        if (modal) modal.classList.add("active");
-    };
-
-    const closeModal = () => {
-        const modal = document.getElementById("taskModal");
-        if (modal) modal.classList.remove("active");
-    };
-
-    const renderCurrentSection = () => {
-        Tasks.renderSection(activeSection);
-    };
-
-    const setSectionVisible = (sectionName) => {
-        document.querySelectorAll(".task-section").forEach((section) => {
-            section.classList.remove("active");
-        });
-
-        const section = document.getElementById(`${sectionName}-section`);
-        if (section) section.classList.add("active");
-    };
-
-    const createSearchTaskElement = (task) => {
-        const div = document.createElement("div");
-        div.className = `task-item ${task.completed ? "completed" : ""}`;
-        div.dataset.taskId = task.id;
-
-        div.innerHTML = `
-      <button class="task-checkbox ${task.completed ? "checked" : ""}" data-action="toggle">
-        ${task.completed ? "✓" : ""}
-      </button>
-      <div class="task-content">
-        <h3 class="task-title">${escapeHtml(task.title)}</h3>
-        ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ""}
-        <div class="task-meta">
-          ${task.category ? `<span class="task-meta-item">${escapeHtml(task.category)}</span>` : ""}
-          <span class="task-priority ${task.priority}">${task.priority.toUpperCase()}</span>
-        </div>
-      </div>
-      <div class="task-actions">
-        <button class="task-btn" data-action="edit">✏️</button>
-        <button class="task-btn delete" data-action="delete">🗑️</button>
-      </div>
-    `;
-
-        return div;
-    };
-
-    const escapeHtml = (text) => {
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
-    };
+    let activeSection = "today";
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", init);
