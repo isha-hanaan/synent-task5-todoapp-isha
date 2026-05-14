@@ -2,186 +2,52 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow - Modern Productivity Made Simple</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>GRID • Task Management App</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<body class="landing-page">
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" />
-                    <path d="M10 16L14 20L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" fill="none" />
-                </svg>
-                <span>TaskFlow</span>
-            </div>
-            <div class="nav-links">
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="12" cy="12" r="5" />
-                        <line x1="12" y1="1" x2="12" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="23" />
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                        <line x1="1" y1="12" x2="3" y2="12" />
-                        <line x1="21" y1="12" x2="23" y2="12" />
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </svg>
-                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                </button>
-                <a href="dashboard.html" class="btn btn-primary">Get Started</a>
-            </div>
-        </div>
-    </nav>
+<body>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Your productivity, elevated</h1>
-            <p class="hero-subtitle">Capture tasks naturally. Stay organized effortlessly. Celebrate every win.</p>
-            <div class="hero-actions">
-                <a href="dashboard.html" class="btn btn-primary btn-lg">Start Organizing</a>
-                <button class="btn btn-secondary btn-lg" id="demoScroll">See What's Possible</button>
-            </div>
-        </div>
-        <div class="hero-visual">
-            <div class="floating-cards">
-                <div class="card-float" style="animation-delay: 0s;">
-                    <div class="card-mini">📝 Write naturally</div>
-                </div>
-                <div class="card-float" style="animation-delay: 1s;">
-                    <div class="card-mini">✨ Get things done</div>
-                </div>
-                <div class="card-float" style="animation-delay: 2s;">
-                    <div class="card-mini">🎯 Stay focused</div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <main class="home-page">
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="section-header">
-            <h2>Built for focus</h2>
-            <p>Everything you need to work smarter</p>
+        <div class="brand">
+
+            <div class="logo"></div>
+
+            <span>GRID</span>
+
         </div>
 
-        <div class="features-grid">
-            <div class="feature-card" data-aos="fade-up">
-                <div class="feature-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 8h24M4 14h24M4 20h24M4 26h24" />
-                    </svg>
-                </div>
-                <h3>Natural Language Input</h3>
-                <p>Type tasks like "Meeting Tuesday at 3pm" and watch it parse automatically.</p>
-            </div>
+        <section class="hero">
 
-            <div class="feature-card" data-aos="fade-up" style="animation-delay: 0.1s;">
-                <div class="feature-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M8 16l4 4 8-8" />
-                        <circle cx="16" cy="16" r="12" />
-                    </svg>
-                </div>
-                <h3>Smart Completion</h3>
-                <p>Mark tasks complete with satisfying animations and earn streaks.</p>
-            </div>
+            <h1>
+                Organize your work.<br>
+                <span>Without overwhelming your mind.</span>
+            </h1>
 
-            <div class="feature-card" data-aos="fade-up" style="animation-delay: 0.2s;">
-                <div class="feature-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 4l8 8M20 4l-8 8" />
-                        <circle cx="16" cy="16" r="12" />
-                    </svg>
-                </div>
-                <h3>Safe Deletion</h3>
-                <p>Never lose work. Deleted tasks live in trash for 30 days.</p>
-            </div>
+            <p class="description">
+                Capture tasks, stay focused, and declutter your day with
+                <span class="brand-line">GRID.</span>
+            </p>
 
-            <div class="feature-card" data-aos="fade-up" style="animation-delay: 0.3s;">
-                <div class="feature-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 4v12M16 20v8" />
-                        <path d="M10 10h12M10 20h12" />
-                    </svg>
-                </div>
-                <h3>Powerful Organization</h3>
-                <p>Today, Upcoming, Someday, Archive—perfect structure for any project.</p>
-            </div>
+            <a href="dashboard.html" class="dashboard-btn">
+                Open Dashboard
+            </a>
 
-            <div class="feature-card" data-aos="fade-up" style="animation-delay: 0.4s;">
-                <div class="feature-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 16c0-6.627 5.373-12 12-12s12 5.373 12 12-5.373 12-12 12" />
-                        <path d="M16 8v8l6 3" />
-                    </svg>
-                </div>
-                <h3>Productivity Stats</h3>
-                <p>Track your progress with streaks, badges, and weekly insights.</p>
-            </div>
+        </section>
 
-            <div class="feature-card" data-aos="fade-up" style="animation-delay: 0.5s;">
-                <div class="feature-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path
-                            d="M28 8v16c0 1.105-.895 2-2 2H6c-1.105 0-2-.895-2-2V8c0-1.105.895-2 2-2h20c1.105 0 2 .895 2 2z" />
-                        <path d="M4 12h24M12 2v8M20 2v8" />
-                    </svg>
-                </div>
-                <h3>Always In Sync</h3>
-                <p>Your data persists locally. Never lose progress, even offline.</p>
-            </div>
-        </div>
-    </section>
+    </main>
 
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number">50K+</div>
-                <div class="stat-label">Tasks Completed</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">10K+</div>
-                <div class="stat-label">Active Users</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">98%</div>
-                <div class="stat-label">Satisfaction</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Always Available</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <h2>Ready to take control?</h2>
-        <p>Start your productivity journey today. No sign-up, no tracking—just pure focus.</p>
-        <a href="dashboard.html" class="btn btn-primary btn-lg">Open Dashboard</a>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 TaskFlow. Built with focus in mind.</p>
-    </footer>
-
-    <script src="js/storage.js"></script>
-    <script src="js/landing.js"></script>
-    <script src="js/app.js"></script>
 </body>
 
 </html>
