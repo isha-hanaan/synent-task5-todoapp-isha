@@ -5,256 +5,194 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GRID • Dashboard</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-
     <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
 </head>
 
 <body>
-    <div class="app-shell">
-        <aside class="sidebar">
-            <div class="brand">
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation Sidebar">
                 <div class="logo"></div>
-                <div class="brand-copy">
-                    <span class="brand-name">GRID</span>
-                    <span class="brand-subtitle">Calm productivity workspace</span>
-                </div>
+                <span class="brand-name">GRID</span>
+            </button>
+        </div>
+
+        <div class="topbar-center">
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search tasks by title, description, or list..."
+                    autocomplete="off">
+                <button id="clearSearchBtn" class="clear-search-btn" aria-label="Clear search"
+                    title="Clear Search">&times;</button>
             </div>
+        </div>
 
-            <div class="sidebar-section">
-                <div class="sidebar-heading">Views</div>
+        <div class="topbar-right">
+            <div class="sort-filter-group">
+                <select id="sortBy" class="control-select" title="Sort Criteria">
+                    <option value="newest">Newest Added</option>
+                    <option value="alpha">Alphabetical (A-Z)</option>
+                    <option value="priority">Priority Order</option>
+                </select>
+                <button id="sortOrderToggle" class="icon-toggle-btn" title="Toggle Sort Order Direction"
+                    aria-label="Toggle order direction">
+                    <svg id="sortOrderIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
 
-                <nav class="sidebar-nav" id="sidebarNav">
-                    <button class="nav-btn active" data-filter="all" type="button">
-                        <span>All tasks</span>
-                        <span class="nav-count" id="countAll">0</span>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebarPanel">
+            <div class="sidebar-scroll-wrapper">
+                <button id="openCreateModalBtn" class="create-task-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Create Task</span>
+                </button>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section-title">Views</div>
+                    <button class="nav-item active" data-view="all">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                        <span>All Tasks</span>
                     </button>
-                    <button class="nav-btn" data-filter="active" type="button">
-                        <span>Active</span>
-                        <span class="nav-count" id="countActive">0</span>
+                    <button class="nav-item" data-view="inbox">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                            <path
+                                d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z">
+                            </path>
+                        </svg>
+                        <span>Inbox Active</span>
                     </button>
-                    <button class="nav-btn" data-filter="completed" type="button">
+                    <button class="nav-item" data-view="starred">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                            </polygon>
+                        </svg>
+                        <span>Starred</span>
+                    </button>
+                    <button class="nav-item" data-view="completed">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
                         <span>Completed</span>
-                        <span class="nav-count" id="countCompleted">0</span>
                     </button>
-                    <button class="nav-btn" data-filter="important" type="button">
-                        <span>Important</span>
-                        <span class="nav-count" id="countImportant">0</span>
+                    <button class="nav-item" data-view="archived">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                            <rect x="1" y="3" width="22" height="5"></rect>
+                            <line x1="10" y1="12" x2="14" y2="12"></line>
+                        </svg>
+                        <span>Archived</span>
                     </button>
-                    <button class="nav-btn" data-filter="trash" type="button">
+                    <button class="nav-item" data-view="trash">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
                         <span>Trash</span>
-                        <span class="nav-count" id="countTrash">0</span>
                     </button>
                 </nav>
-            </div>
 
-            <div class="sidebar-section sidebar-note">
-                <div class="sidebar-heading">Shortcuts</div>
-                <p>
-                    Press <strong>/</strong> to search, <strong>N</strong> for a new task.
-                </p>
-            </div>
-
-            <div class="sidebar-section sidebar-actions">
-                <button class="ghost-btn full-width" id="clearCompletedBtn" type="button">
-                    Clear completed
-                </button>
-                <button class="ghost-btn full-width" id="emptyTrashBtn" type="button">
-                    Empty trash
-                </button>
+                <div class="sidebar-divider"></div>
+                <div class="lists-section">
+                    <div class="lists-header">
+                        <span class="nav-section-title">Custom Lists</span>
+                        <button id="addListBtn" title="Create New List" aria-label="Add custom list">+</button>
+                    </div>
+                    <div id="customListsContainer" class="custom-lists-list">
+                    </div>
+                </div>
             </div>
         </aside>
 
-        <main class="content">
-            <header class="page-header">
-                <div>
-                    <p class="eyebrow">WORKSPACE</p>
-                    <p class="page-description">
-                        A calm workspace for tasks, notes, due dates, priorities, and recovery when needed.
-                    </p>
-                </div>
+        <main class="center-content">
+            <div class="view-header-row">
+                <h2 id="currentViewTitle">All Tasks</h2>
+                <span id="taskCounter" class="task-counter-pill">0 tasks</span>
+            </div>
 
-                <div class="header-meta">
-                    <div class="meta-pill">
-                        <span>Today</span>
-                        <strong id="todayDate">—</strong>
-                    </div>
-                    <div class="meta-pill">
-                        <span>Total</span>
-                        <strong id="taskCount">0</strong>
-                    </div>
-                    <div class="meta-pill">
-                        <span>Done</span>
-                        <strong id="completedCount">0</strong>
-                    </div>
-                    <div class="meta-pill progress-pill">
-                        <span>Progress</span>
-                        <strong id="progressLabel">0%</strong>
-                        <div class="progress-track">
-                            <div class="progress-fill" id="progressBar"></div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <section class="toolbar">
-                <div class="search-wrap">
-                    <input type="search" id="taskSearch" placeholder="Search tasks, notes, tags..."
-                        autocomplete="off" />
-                </div>
-
-                <div class="toolbar-actions">
-                    <select id="taskSort" aria-label="Sort tasks">
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
-                        <option value="due">Due date</option>
-                        <option value="priority">Priority</option>
-                        <option value="title">Title</option>
-                    </select>
-
-                    <button class="ghost-btn hidden" id="clearSearchBtn" type="button">
-                        Clear search
-                    </button>
-                </div>
-            </section>
-
-            <section class="composer-card">
-                <div class="composer-head">
-                    <div>
-                        <h2>Quick add</h2>
-                        <p>Create a task with details, then refine it in the inspector.</p>
-                    </div>
-                </div>
-
-                <div class="composer-grid">
-                    <input type="text" id="newTaskTitle" placeholder="Task title" autocomplete="off" />
-
-                    <textarea id="newTaskNotes" rows="2" placeholder="Optional notes"></textarea>
-
-                    <div class="composer-row">
-                        <input type="date" id="newTaskDue" />
-                        <select id="newTaskPriority">
-                            <option value="low">Low priority</option>
-                            <option value="medium" selected>Medium priority</option>
-                            <option value="high">High priority</option>
-                            <option value="urgent">Urgent</option>
-                        </select>
-                        <input type="text" id="newTaskTag" placeholder="Tag" autocomplete="off" />
-                        <label class="inline-check">
-                            <input type="checkbox" id="newTaskImportant" />
-                            <span>Important</span>
-                        </label>
-                        <button id="createTaskBtn" type="button" disabled>Add task</button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="workspace-card">
-                <div class="section-head">
-                    <div>
-                        <h2>Tasks</h2>
-                        <p>Click a row to open the inspector.</p>
-                    </div>
-                    <span id="visibleCount">0 visible</span>
-                </div>
-
-                <div class="task-list" id="taskList"></div>
-
-                <div class="empty-state hidden" id="emptyState">
-                    <h3 id="emptyTitle">No tasks yet</h3>
-                    <p id="emptyText">Add your first task to begin your workspace.</p>
-                </div>
-            </section>
+            <div id="taskList" class="task-list-grid">
+            </div>
         </main>
 
-        <aside class="inspector">
-            <div class="inspector-empty" id="inspectorEmpty">
-                <p class="eyebrow">Inspector</p>
-                <h3>Select a task</h3>
-                <p>
-                    Open a task from the list to edit its title, notes, due date, priority, tag, or status.
-                </p>
+        <aside class="inspector-panel" id="inspectorPanel">
+            <div class="inspector-header">
+                <h3>Task Details</h3>
+                <button id="closeInspectorBtn" class="close-btn" aria-label="Close details view">&times;</button>
             </div>
-
-            <form class="inspector-form hidden" id="inspectorForm">
-                <div class="inspector-head">
-                    <p class="eyebrow">Inspector</p>
-                    <h3>Task details</h3>
-                </div>
-
-                <label class="field">
-                    <span>Title</span>
-                    <input type="text" id="detailTitle" />
-                </label>
-
-                <label class="field">
-                    <span>Notes</span>
-                    <textarea id="detailNotes" rows="6"></textarea>
-                </label>
-
-                <div class="field-grid">
-                    <label class="field">
-                        <span>Due date</span>
-                        <input type="date" id="detailDue" />
-                    </label>
-
-                    <label class="field">
-                        <span>Priority</span>
-                        <select id="detailPriority">
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
-                        </select>
-                    </label>
-                </div>
-
-                <label class="field">
-                    <span>Tag</span>
-                    <input type="text" id="detailTag" />
-                </label>
-
-                <label class="checkbox-line">
-                    <input type="checkbox" id="detailImportant" />
-                    <span>Mark as important</span>
-                </label>
-
-                <label class="checkbox-line">
-                    <input type="checkbox" id="detailCompleted" />
-                    <span>Mark as completed</span>
-                </label>
-
-                <div class="inspector-meta">
-                    <div>
-                        <span>Created</span>
-                        <strong id="detailCreated">—</strong>
-                    </div>
-                    <div>
-                        <span>Updated</span>
-                        <strong id="detailUpdated">—</strong>
-                    </div>
-                </div>
-
-                <div class="inspector-actions">
-                    <button type="button" class="soft-btn hidden" id="restoreTaskBtn">Restore</button>
-                    <button type="button" class="soft-btn" id="duplicateTaskBtn">Duplicate</button>
-                    <button type="button" class="danger-btn" id="deleteTaskBtn">Move to trash</button>
-                </div>
-            </form>
+            <div id="inspectorContent" class="inspector-body">
+            </div>
         </aside>
     </div>
 
-    <div class="toast" id="toast" aria-live="polite" aria-atomic="true">
-        <span id="toastMessage">Task moved to trash</span>
-        <button type="button" id="toastUndoBtn">Undo</button>
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 id="modalTitle">Create Task</h3>
+                <button id="closeModalBtn" class="close-btn" aria-label="Close modal dialog">&times;</button>
+            </div>
+            <form id="taskForm" class="modal-body">
+                <input type="hidden" id="formTaskId" value="">
+
+                <div class="form-group">
+                    <label for="taskTitleInput">Task Title *</label>
+                    <input type="text" id="taskTitleInput" placeholder="What needs to be done?" required
+                        maxLength="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescInput">Description</label>
+                    <textarea id="taskDescInput" rows="4"
+                        placeholder="Add explicit details or notes here..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskCategorySelect">Assign List</label>
+                        <select id="taskCategorySelect">
+                            <option value="">None (Unassigned)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskPrioritySelect">Priority Level</label>
+                        <select id="taskPrioritySelect">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="submitModalBtn" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <div id="toastContainer" class="toast-stack"></div>
+    <script src="js/dashboard.js"></script>
 </body>
 
 </html>
