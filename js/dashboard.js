@@ -4,12 +4,12 @@
     let state = {
         tasks: [],
         lists: ['Personal', 'Work', 'Shopping', 'Grocery'],
-        currentView: 'inbox',          // 'all', 'inbox', 'starred', 'completed', 'archived', 'trash'
-        currentCustomList: null,     // Set string label when tracking a user list category
+        currentView: 'inbox',    // 'all', 'inbox', 'starred', 'completed', 'archived', 'trash'
+        currentCustomList: null,
         searchQuery: '',
-        sortBy: 'newest',            // 'newest', 'alpha', 'priority'
-        sortAscending: false,        // Toggle inversion tracking rule
-        selectedTaskId: null         // Tracks task actively open inside the inspector panel
+        sortBy: 'newest',      // 'newest', 'alpha', 'priority'
+        sortAscending: false,
+        selectedTaskId: null
     };
 
     let undoStack = [];
@@ -67,9 +67,9 @@
             }
         } else {
             state.tasks = [
-                { id: '1', title: 'Design high-fidelity dashboard layouts', desc: 'Focus strictly on premium glassmorphism surfaces and dark luxurious gradient overlays.', category: 'Work', priority: 'high', starred: true, completed: false, archived: false, trashed: false, created: Date.now() - 86400000 },
-                { id: '2', title: 'Review structural architectural metrics', desc: 'Ensure accessibility contracts are safely respected before deployment pipelines fire.', category: 'Work', priority: 'medium', starred: false, completed: false, archived: false, trashed: false, created: Date.now() - 3600000 },
-                { id: '3', title: 'Pick up whole coffee beans', desc: 'Light roast profiles, preferably processing notes containing stone fruits or jasmine.', category: 'Shopping', priority: 'low', starred: false, completed: true, archived: false, trashed: false, created: Date.now() - 7200000 }
+                { id: '1', title: 'Create a login page for an application ', desc: 'Design a clean login interface that includes e-mail & password fields, login button, and a "Forgot Password" text. It should be a modern & properly aligned UI.', category: 'Work', priority: 'high', starred: true, completed: false, archived: false, trashed: false, created: Date.now() - 86400000 },
+                { id: '2', title: 'Book a dermatologist appointment', desc: 'Coming weekend, get your foot crack & other skin issues solved.', category: 'Personal', priority: 'medium', starred: false, completed: false, archived: false, trashed: false, created: Date.now() - 3600000 },
+                { id: '3', title: 'Buy veggies & fruits', desc: 'Papaya, oranges, mangoes, cucumber, carrots, beans, cauliflower, sweet corn, bananas.', category: 'Shopping', priority: 'low', starred: false, completed: true, archived: false, trashed: false, created: Date.now() - 7200000 }
             ];
             saveStateToStorage();
         }
@@ -98,8 +98,8 @@
             btn.innerHTML = `
                 <span class="list-name-text">${escapeHTML(listName)}</span>
                 <div class="list-actions">
-                    <button class="list-action-btn edit-list-trigger" title="Edit list label" aria-label="Edit list">✏️</button>
-                    <button class="list-action-btn delete-list-trigger" title="Delete custom list" aria-label="Delete list">&times;</button>
+                    <button class="list-action-btn edit-list-trigger" title="Edit List Label" aria-label="Edit list">✏️</button>
+                    <button class="list-action-btn delete-list-trigger" title="Delete List Label" aria-label="Delete list">&times;</button>
                 </div>
             `;
             DOM.customListsContainer.appendChild(btn);
@@ -267,7 +267,7 @@
                <p class="task-snippet">
                 ${task.desc
                     ? escapeHTML(task.desc)
-                    : '<i>No additional description context loaded.</i>'
+                    : '<i>No additional details added yet.</i>'
                 }
             </p>
         </div>
@@ -365,11 +365,11 @@
                     <span class="list-category-tag">${task.category ? escapeHTML(task.category) : 'None (Unassigned)'}</span>
                 </div>
                 <div class="meta-row">
-                    <span class="meta-label">Priority Profile</span>
+                    <span class="meta-label">Priority Status</span>
                     <span class="priority-tag priority-${safePriority}">${safePriority}</span>
                 </div>
                 <div class="meta-row">
-                    <span class="meta-label">Status Parameter</span>
+                    <span class="meta-label">Current State</span>
                     <span class="priority-tag" style="background:rgba(255,255,255,0.05); color:var(--text); border:1px solid var(--glass-border)">
                         ${task.trashed ? 'In Trash bin' : task.archived ? 'Archived Context' : task.completed ? 'Completed' : 'Active / Pending'}
                     </span>
@@ -377,13 +377,13 @@
             </div>
 
             <div class="form-group">
-                <label>Detailed Specifications</label>
-                <div class="inspector-desc">${task.desc ? escapeHTML(task.desc) : '<i>No descriptive specification data strings provided.</i>'}</div>
+                <label>Additional Description</label>
+                <div class="inspector-desc">${task.desc ? escapeHTML(task.desc) : '<i>No descriptive specification added yet.</i>'}</div>
             </div>
 
             <div class="inspector-actions-footer">
-                <button id="inspectorEditBtn" class="btn btn-secondary">Edit Task Specifications</button>
-                <button id="inspectorCompleteBtn" class="btn btn-primary">${task.completed ? 'Mark as Incomplete' : 'Complete Task Operation'}</button>
+                <button id="inspectorEditBtn" class="btn btn-secondary">Edit Task Details</button>
+                <button id="inspectorCompleteBtn" class="btn btn-primary">${task.completed ? 'Mark as Incomplete' : 'Mark as Completed'}</button>
                 <button id="inspectorDeleteBtn" class="btn btn-danger">${task.trashed ? 'Permanently Delete Task' : 'Move to Trash Bin'}</button>
             </div>
         `;
@@ -442,13 +442,13 @@
         if (event) event.stopPropagation();
 
         if (task.trashed) {
-            if (confirm('Are you absolutely certain you want to permanently delete this task? This operation can never be undone.')) {
+            if (confirm('Are you sure you want to permanently delete this task? This action cannot be undone.')) {
                 state.tasks = state.tasks.filter(t => t.id !== task.id);
                 if (state.selectedTaskId === task.id) state.selectedTaskId = null;
                 saveStateToStorage();
                 renderTasks();
                 renderInspector();
-                spawnToast('Task permanently purged from registries.');
+                spawnToast('Task data successfully deleted. This action is irreversible.');
             }
         } else {
             commitTaskMutation(task, {
@@ -461,7 +461,6 @@
     }
 
     function spawnToast(message, provisionUndo = false) {
-        // Prevent toast stack overflow explosion conditions
         if (DOM.toastContainer.children.length > 2) {
             DOM.toastContainer.removeChild(DOM.toastContainer.firstChild);
         }
@@ -580,7 +579,7 @@
 
             if (e.target.classList.contains('delete-list-trigger')) {
                 e.stopPropagation();
-                if (confirm(`Are you certain you want to delete the list type "${listName}"?`)) {
+                if (confirm(`Are you sure you want to delete the list "${listName}"?`)) {
                     state.lists = state.lists.filter(l => l !== listName);
                     state.tasks.forEach(t => { if (t.category === listName) t.category = null; });
                     if (state.currentCustomList === listName) {
@@ -592,7 +591,7 @@
                     renderCustomLists();
                     renderTasks();
                     if (state.selectedTaskId) renderInspector();
-                    spawnToast('Custom list filter safely cleared.');
+                    spawnToast('List filter deleted.');
                 }
                 return;
             }
@@ -604,7 +603,7 @@
                 if (revisedLabel && revisedLabel.trim() !== '' && revisedLabel.trim() !== currentLabel) {
                     const cleanLabel = revisedLabel.trim();
                     if (state.lists.includes(cleanLabel)) {
-                        alert('A profile with that label structure already exists.');
+                        alert('This label already exists.');
                         return;
                     }
                     const targetIndex = state.lists.indexOf(currentLabel);
@@ -616,7 +615,7 @@
                         renderCustomLists();
                         renderTasks();
                         if (state.selectedTaskId) renderInspector();
-                        spawnToast('List definitions updated mapping schemas.');
+                        spawnToast('List name updated successfully.');
                     }
                 }
                 return;
@@ -646,17 +645,17 @@
         });
 
         DOM.addListBtn.addEventListener('click', () => {
-            const rawInput = prompt('Enter string label for new custom list category allocation:');
+            const rawInput = prompt('Enter a name for the new custom list:');
             if (rawInput && rawInput.trim() !== '') {
                 const standardized = rawInput.trim();
                 if (state.lists.some(l => l.toLowerCase() === standardized.toLowerCase())) {
-                    alert('This category name string variant already occupies an active allocation lane.');
+                    alert('A label with this name already exists. Please choose a different name.');
                     return;
                 }
                 state.lists.push(standardized);
                 saveStateToStorage();
                 renderCustomLists();
-                spawnToast(`Category list registry "${standardized}" successfully established.`);
+                spawnToast(`Succesfully created "${standardized}" list label.`);
             }
         });
 
@@ -737,14 +736,14 @@
         renderCustomLists();
 
         if (editingTaskInstance) {
-            DOM.modalTitle.textContent = 'Edit Task Properties';
+            DOM.modalTitle.textContent = 'Edit Task Details';
             DOM.formTaskId.value = editingTaskInstance.id;
             DOM.taskTitleInput.value = editingTaskInstance.title;
             DOM.taskDescInput.value = editingTaskInstance.desc || '';
             DOM.taskCategorySelect.value = editingTaskInstance.category || '';
             DOM.taskPrioritySelect.value = editingTaskInstance.priority;
         } else {
-            DOM.modalTitle.textContent = 'Create New Task Entry';
+            DOM.modalTitle.textContent = 'Create New Task';
             if (state.currentView === 'list' && state.currentCustomList) {
                 DOM.taskCategorySelect.value = state.currentCustomList;
             }
@@ -768,7 +767,7 @@
         const parsedPriority = DOM.taskPrioritySelect.value;
 
         if (parsedTitle === '') {
-            alert('A title parameter is structural and required to safely register task instances.');
+            alert('The title field is mandatory for task creation. Please provide a concise title for the task.');
             return;
         }
 
@@ -780,7 +779,7 @@
                     desc: parsedDesc,
                     category: parsedCategory !== '' ? parsedCategory : null,
                     priority: parsedPriority
-                }, 'Task specifications accurately adjusted');
+                }, 'Task details updated');
             }
         } else {
             const freshTask = {
@@ -799,7 +798,7 @@
             state.tasks.push(freshTask);
             saveStateToStorage();
             renderTasks();
-            spawnToast('Fresh interactive task object initialized.');
+            spawnToast('New task has been created successfully.');
         }
 
         closeTaskModal();
