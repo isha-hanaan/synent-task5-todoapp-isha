@@ -489,7 +489,6 @@
                 setTimeout(() => toast.remove(), 250);
             });
 
-
             toast.appendChild(undoBtn);
         }
 

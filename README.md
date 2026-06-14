@@ -1,8 +1,14 @@
-# GRID — Modern Task Management Dashboard
+# GRID - Modern Task Management Dashboard
 
 GRID is a modern and responsive task management web application built using HTML, CSS, and Vanilla JavaScript.
 
 The application focuses on productivity, minimalism, and clean user experience while providing powerful task organization features such as custom lists, task prioritization, archiving, trash management, search, filtering, and task inspection panels.
+
+---
+
+## Objective
+
+To build a responsive task management web application using HTML, CSS, and JavaScript that allows users to create, manage, complete, and delete tasks while maintaining data persistence using LocalStorage.
 
 ---
 
@@ -90,90 +96,48 @@ The application focuses on productivity, minimalism, and clean user experience w
 
 ---
 
-## Folder Structure
+## Methodology
 
-```bash
-GRID/
-│
-├── css/
-│   ├── global.css
-│   ├── home.css
-│   └── dashboard.css
-│
-├── js/
-│   └── dashboard.js
-│
-├── home.html
-├── dashboard.html
-└── README.md
-```
+The project was developed following a structured approach:
 
----
-
-## Pages
-
-### `home.html`
-Landing page for the GRID application.
-
-### `dashboard.html`
-Main task management dashboard interface.
+1. Designed the landing page and dashboard UI.
+2. Implemented task creation and editing functionality.
+3. Added task completion and deletion features.
+4. Implemented archive and trash management.
+5. Used LocalStorage to store tasks and custom lists.
+6. Added search, sorting, and filtering features.
+7. Improved responsiveness for mobile and tablet devices.
+8. Tested persistence and user interactions.
 
 ---
 
 ## Core Functionalities
 
-### Local Storage Persistence
-All tasks and custom lists are stored in the browser using LocalStorage.
+- Tasks are persisted using LocalStorage.
+- Each task can be completed, starred, archived, or moved to trash.
+- Undo functionality is provided through a rollback stack mechanism.
 
-```javascript
-localStorage.setItem('GRID_dashboard_tasks', JSON.stringify(state.tasks));
+---
+
+## Folder Structure
+
+```bash
+GRID/
+│
+├── assets/
+├── css/
+│   ├── dashboard.css
+│   ├── global.css
+│   └── home.css
+│
+├── js/
+│   └── dashboard.js
+│
+├── dashboard.html
+├── home.html
+├── index.html
+└── README.md
 ```
-
----
-
-### Task States
-
-Each task supports:
-- Completed
-- Starred
-- Archived
-- Trashed
-
----
-
-### Undo System
-
-The dashboard includes an undo stack mechanism for task mutations.
-
-```javascript
-pushUndoStack(label, rollbackCallback);
-```
-
----
-
-## UI Highlights
-
-- Glassmorphism-inspired interface
-- Smooth transitions and animations
-- Modern typography
-- Soft gradients
-- Dynamic inspector panel
-- Responsive modal system
-- Interactive toast notifications
-
----
-
-## Responsive Features
-
-GRID is fully responsive and optimized for:
-- Desktop
-- Tablet
-- Mobile devices
-
-Mobile enhancements include:
-- Slide-out sidebar
-- Full-screen inspector panel
-- Touch-friendly action buttons
 
 ---
 
@@ -194,6 +158,31 @@ cd synent-task5-todoapp-isha
 ### 3. Open the Project
 
 Open `home.html` in your browser.
+
+---
+
+## Hosted Application
+
+[🌐 View Website](https://isha-hanaan.github.io/synent-task5-todoapp-isha/)
+
+---
+
+## Demo Video
+
+[🎥 Watch on YouTube](https://youtu.be/your-video-id)
+
+---
+
+## Project Report
+
+### Problem Statement
+Develop a To-Do List web application with persistent storage.
+
+### Solution
+Implemented a modern task management dashboard using HTML, CSS, and JavaScript with LocalStorage support.
+
+### Result
+Users can create, edit, complete, archive, and delete tasks while maintaining data after page refresh.
 
 ---
 
@@ -221,35 +210,14 @@ Potential upgrades for the application:
 
 ---
 
-## Accessibility Features
-
-- Semantic HTML structure
-- ARIA labels
-- Keyboard navigation support
-- Focus-visible states
-- Responsive touch targets
-
----
-
-## Design Philosophy
-
-GRID was designed to:
-- Reduce visual clutter
-- Improve focus
-- Maintain clean information hierarchy
-- Deliver smooth productivity workflows
-
-The UI emphasizes clarity, spacing, readability, and modern interaction design.
-
----
-
 ## Author
-Isha Hanaan
 
-Developed as a modern frontend task management project using pure frontend technologies.
+Created by **Isha Hanaan**
+
+- GitHub: https://github.com/isha-hanaan
 
 ---
 
 ## License
 
-This project is open-source and available for educational and personal use.
+This project was developed for educational and internship assignment purposes under Synent Task 5.
