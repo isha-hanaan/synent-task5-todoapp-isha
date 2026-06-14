@@ -134,7 +134,6 @@ GRID/
 │   └── dashboard.js
 │
 ├── dashboard.html
-├── home.html
 ├── index.html
 └── README.md
 ```
@@ -157,7 +156,7 @@ cd synent-task5-todoapp-isha
 
 ### 3. Open the Project
 
-Open `home.html` in your browser.
+Open `index.html` in your browser.
 
 ---
 

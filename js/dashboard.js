@@ -512,7 +512,7 @@
                 state.selectedTaskId = null;
                 DOM.sidebarPanel.classList.toggle('drawer-active');
             } else {
-                window.location.href = 'home.html';
+                window.location.href = 'index.html';
             }
         });
 
