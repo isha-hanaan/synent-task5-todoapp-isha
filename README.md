@@ -168,7 +168,7 @@ Open `index.html` in your browser.
 
 ## Demo Video
 
-[🎥 Watch on YouTube](https://youtu.be/your-video-id)
+[🎥 Watch on YouTube](https://youtu.be/9OHOhToHOj4)
 
 ---
 
